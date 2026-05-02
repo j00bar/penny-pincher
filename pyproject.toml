@@ -1,0 +1,39 @@
+[project]
+name = "penny-pincher"
+version = "0.1.0"
+description = "Local Claude API proxy — routes 'local' model requests to LM Studio"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "typer>=0.15",
+    "pydantic-settings>=2.7",
+    "httpx>=0.28",
+    "structlog>=25.0",
+]
+
+[project.scripts]
+penny-pincher = "penny_pincher.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/penny_pincher"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["penny_pincher"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "src"
