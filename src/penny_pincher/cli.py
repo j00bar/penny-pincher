@@ -24,6 +24,10 @@ def serve(
     lm_studio_url: Annotated[
         str | None, typer.Option("--lm-studio-url", help="LM Studio base URL (PP_LM_STUDIO_URL)")
     ] = None,
+    fallback_model: Annotated[
+        str | None,
+        typer.Option("--fallback-model", help="Model to use when local is unconfigured (PP_FALLBACK_MODEL)"),
+    ] = None,
 ) -> None:
     overrides = {
         k: v
@@ -33,6 +37,7 @@ def serve(
             "local_model": local_model,
             "local_model_context_length": local_model_context_length,
             "lm_studio_url": lm_studio_url,
+            "fallback_model": fallback_model,
         }.items()
         if v is not None
     }
