@@ -33,6 +33,8 @@ All settings are readable from environment variables (prefix `PP_`) or a `.env` 
 | `PP_LM_STUDIO_URL` | `--lm-studio-url` | `http://localhost:1234` | LM Studio base URL |
 | `PP_ANTHROPIC_API_KEY` | `--api-key` | *(required for Anthropic routing)* | Anthropic API key |
 | `PP_ANTHROPIC_BASE_URL` | — | `https://api.anthropic.com` | Anthropic base URL |
+| `PP_LOCAL_MODEL_ALIAS` | `--local-model-alias` | `local` | Model name that routes requests to LM Studio |
+| `PP_LMS_PATH` | `--lms-path` | `lms` | Path to the `lms` CLI binary |
 
 ## Development
 

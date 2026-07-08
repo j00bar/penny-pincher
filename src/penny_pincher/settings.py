@@ -12,8 +12,14 @@ class Settings(BaseSettings):
     local_model: str | None = None
     local_model_context_length: int = 32768
 
-    # Model used when a request targets `local` but no local backend is configured.
+    # Alias sent by clients to request the local backend.
+    local_model_alias: str = "local"
+
+    # Model used when a request targets the local alias but no local backend is configured.
     fallback_model: str = "claude-haiku-4-5"
+
+    # Path to the lms CLI binary.
+    lms_path: str = "lms"
 
     host: str = "127.0.0.1"
     port: int = 8082

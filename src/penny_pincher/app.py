@@ -14,7 +14,6 @@ from penny_pincher.settings import Settings
 
 log = structlog.get_logger(__name__)
 
-LOCAL_MODEL_ALIAS = "local"
 _HOP_BY_HOP = frozenset(
     {"host", "content-length", "transfer-encoding", "connection", "keep-alive", "te", "trailers", "upgrade"}
 )
@@ -73,9 +72,9 @@ def create_app(settings: Settings, http_client: httpx.AsyncClient | None = None)
 
         upstream_headers = {k: v for k, v in request.headers.items() if k.lower() not in _HOP_BY_HOP}
 
-        if model == LOCAL_MODEL_ALIAS and settings.local_configured:
+        if model == settings.local_model_alias and settings.local_configured:
             return await _handle_local(client, body, streaming, upstream_headers, settings)
-        if model == LOCAL_MODEL_ALIAS:
+        if model == settings.local_model_alias:
             log.debug("local_unconfigured_fallback", fallback_model=settings.fallback_model)
             body = {**body, "model": settings.fallback_model}
         return await _handle_anthropic(client, body, streaming, upstream_headers, settings)
@@ -86,12 +85,12 @@ def create_app(settings: Settings, http_client: httpx.AsyncClient | None = None)
         model: str = body.get("model", "")
         client: httpx.AsyncClient = request.app.state.http
 
-        if model == LOCAL_MODEL_ALIAS and settings.local_configured:
+        if model == settings.local_model_alias and settings.local_configured:
             tokens = _count_tokens_local(body)
             log.debug("count_tokens_local", tokens=tokens)
             return JSONResponse({"input_tokens": tokens})
 
-        if model == LOCAL_MODEL_ALIAS:
+        if model == settings.local_model_alias:
             body = {**body, "model": settings.fallback_model}
 
         upstream_headers = {k: v for k, v in request.headers.items() if k.lower() not in _HOP_BY_HOP}
@@ -116,7 +115,7 @@ async def _handle_local(
 ) -> Any:
     assert settings.local_model is not None and settings.lm_studio_url is not None
     try:
-        await lms.ensure_loaded(settings.local_model, settings.local_model_context_length)
+        await lms.ensure_loaded(settings.local_model, settings.local_model_context_length, settings.lms_path)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 

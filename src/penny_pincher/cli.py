@@ -28,6 +28,14 @@ def serve(
         str | None,
         typer.Option("--fallback-model", help="Model to use when local is unconfigured (PP_FALLBACK_MODEL)"),
     ] = None,
+    local_model_alias: Annotated[
+        str | None,
+        typer.Option("--local-model-alias", help="Model name that routes to LM Studio (PP_LOCAL_MODEL_ALIAS)"),
+    ] = None,
+    lms_path: Annotated[
+        str | None,
+        typer.Option("--lms-path", help="Path to the lms CLI binary (PP_LMS_PATH)"),
+    ] = None,
 ) -> None:
     overrides = {
         k: v
@@ -38,6 +46,8 @@ def serve(
             "local_model_context_length": local_model_context_length,
             "lm_studio_url": lm_studio_url,
             "fallback_model": fallback_model,
+            "local_model_alias": local_model_alias,
+            "lms_path": lms_path,
         }.items()
         if v is not None
     }
