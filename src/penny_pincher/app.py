@@ -77,7 +77,7 @@ def create_app(settings: Settings, http_client: httpx.AsyncClient | None = None)
         if model == settings.local_model_alias:
             log.debug("local_unconfigured_fallback", fallback_model=settings.fallback_model)
             body = {**body, "model": settings.fallback_model}
-        return await _handle_anthropic(client, body, streaming, upstream_headers, settings)
+        return await _handle_anthropic(client, body, streaming, upstream_headers, settings, str(request.url.query))
 
     @app.post("/v1/messages/count_tokens")
     async def count_tokens(request: Request) -> Any:
@@ -95,6 +95,8 @@ def create_app(settings: Settings, http_client: httpx.AsyncClient | None = None)
 
         upstream_headers = {k: v for k, v in request.headers.items() if k.lower() not in _HOP_BY_HOP}
         url = f"{settings.anthropic_base_url}/v1/messages/count_tokens"
+        if request.url.query:
+            url = f"{url}?{request.url.query}"
         resp = await client.post(url, json=body, headers=upstream_headers)
         log.debug("count_tokens_anthropic", status_code=resp.status_code, model=body.get("model"))
         return JSONResponse(content=resp.json(), status_code=resp.status_code)
@@ -175,8 +177,11 @@ async def _handle_anthropic(
     streaming: bool,
     headers: dict[str, str],
     settings: Settings,
+    query: str = "",
 ) -> Any:
     url = f"{settings.anthropic_base_url}/v1/messages"
+    if query:
+        url = f"{url}?{query}"
     log.debug("routing_anthropic", url=url, model=body.get("model"), streaming=streaming)
 
     if streaming:
@@ -187,6 +192,8 @@ async def _handle_anthropic(
 
     resp = await client.post(url, json=body, headers=headers)
     log.debug("anthropic_response", status_code=resp.status_code)
+    if resp.status_code != 200:
+        log.warning("anthropic_error", status_code=resp.status_code, body=resp.text[:500])
     return JSONResponse(content=resp.json(), status_code=resp.status_code)
 
 
